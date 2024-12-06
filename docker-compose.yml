@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+
+  db:
+    image: mysql:8.3.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234567
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 1234567
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      vpcbr:
+        ipv4_address: 172.20.0.4
+
+
+  api:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: crud
+    ports:
+      - "8080:8080"
+    networks:
+      vpcbr:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - db
+
+
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+
+volumes:
+  mysql-data:
+    driver: local
